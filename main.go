@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 )
 
@@ -35,8 +34,4 @@ func cpuReset() error {
 }
 
 func main() {
-	gameMemory[programCounter] = 0b10101111
-	gameMemory[programCounter+1] = 0b10101010
-	fmt.Printf("%b\n", getNextOpcode()) // 1010101010101111
-	fmt.Println("1010111110101010")
 }

@@ -60,3 +60,11 @@ func opcode5XY0(opcode word) {
 		programCounter += 2
 	}
 }
+
+func opcode6XNN(opcode word) {
+	regx := opcode & 0x0f00
+	regx >>= 8
+
+	nn := byte(opcode & 0x00ff)
+	registers[regx] = nn
+}
