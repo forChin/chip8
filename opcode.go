@@ -209,3 +209,151 @@ func opcodeCXNN(opcode word) {
 
 	registers[regx] = randByte() & nn
 }
+
+// RECHECK
+func opcodeDXYN(opcode word) {
+	const scale byte = 10
+
+	regx := opcode & 0x0f00
+	regx >>= 8
+	xCoord := registers[regx] * scale
+
+	regy := opcode & 0x00f0
+	regy >>= 4
+	yCoord := registers[regy] * scale
+
+	height := opcode & 0x000f
+
+	for yline := word(0); yline < height; yline++ {
+		sprite := gameMemory[addressI+yline]
+
+		for xpixel, xpixelinv := 0, 7; xpixel < 8; xpixel, xpixelinv = xpixel+1, xpixelinv+1 {
+			var mask byte = 1 << xpixelinv
+			if sprite&mask == 1 {
+				x := xCoord + byte(xpixel)*scale
+				y := yCoord + byte(yline)*scale
+
+				var color byte
+				if screenData[y][x][0] == 0 { // !=
+					color = 255
+					registers[0xf] = 1
+				} else {
+					color = 0 // remove ?
+					registers[0xf] = 0
+				}
+
+				for i := byte(0); i < scale; i++ {
+					for j := byte(0); j < scale; j++ {
+						screenData[y+i][x+j][0] = color
+						screenData[y+i][x+j][1] = color
+						screenData[y+i][x+j][2] = color
+					}
+				}
+			}
+		}
+	}
+}
+
+func opcodeEX9E(opcode word) {
+	regx := opcode & 0x0f00
+	regx >>= 8
+
+	key := registers[regx]
+
+	if keyState[key] == 1 {
+		programCounter += 2
+	}
+}
+
+func opcodeEXA1(opcode word) {
+	regx := opcode & 0x0f00
+	regx >>= 8
+
+	key := registers[regx]
+
+	if keyState[key] == 0 {
+		programCounter += 2
+	}
+}
+
+func opcodeFX07(opcode word) {
+	regx := opcode & 0x0f00
+	regx >>= 8
+
+	registers[regx] = delayTimer
+}
+
+func opcodeFX0A(opcode word) {
+	regx := opcode & 0x0f00
+	regx >>= 8
+
+	keyInd := pressedKey()
+
+	if keyInd == -1 {
+		programCounter -= 2
+	} else {
+		registers[regx] = byte(keyInd)
+	}
+}
+
+func opcodeFX15(opcode word) {
+	regx := opcode & 0x0f00
+	regx >>= 8
+
+	delayTimer = registers[regx]
+}
+
+func opcodeFX18(opcode word) {
+	regx := opcode & 0x0f00
+	regx >>= 8
+
+	soundTimer = registers[regx]
+}
+
+func opcodeFX1E(opcode word) {
+	regx := opcode & 0x0f00
+	regx >>= 8
+
+	addressI += word(registers[regx])
+}
+
+func opcodeFX29(opcode word) {
+	regx := opcode & 0x0f00
+	regx >>= 8
+	addressI = word(registers[regx]) * 5
+}
+
+func opcodeFX33(opcode word) {
+	regx := opcode & 0x0f00
+	regx >>= 8
+
+	hundreds := registers[regx] / 100
+	tens := registers[regx] % 100 / 10
+	ones := registers[regx] % 10
+
+	gameMemory[addressI] = hundreds
+	gameMemory[addressI+1] = tens
+	gameMemory[addressI+2] = ones
+}
+
+func opcodeFX55(opcode word) {
+	regx := opcode & 0x0f00
+	regx >>= 8
+
+	for i := word(0); i <= regx; i++ {
+		gameMemory[addressI+i] = registers[i]
+	}
+
+	addressI += regx + 1 // incremnt in loop
+}
+
+func opcodeFX65(opcode word) {
+	regx := opcode & 0x0f00
+	regx >>= 8
+
+	for i := word(0); i <= regx; i++ {
+		registers[i] = gameMemory[addressI+i]
+	}
+
+	addressI += regx + 1 // incremnt in loop
+}

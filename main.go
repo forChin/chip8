@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"math/rand"
 	"time"
@@ -20,7 +19,13 @@ var (
 	addressI       word
 	gameStack      stack
 	programCounter word
-	screenData     [64][32]byte // [32][64] ?
+
+	// [3] is RGB
+	screenData [64][32][3]byte // [32][64] ?
+	keyState   []byte
+
+	delayTimer byte
+	soundTimer byte
 )
 
 func init() {
@@ -40,19 +45,15 @@ func cpuReset() error {
 	return nil
 }
 
+func pressedKey() int {
+	for i, k := range keyState {
+		if k != 0 {
+			return i
+		}
+	}
+
+	return -1
+}
+
 func main() {
-	fmt.Println(randByte())
-	fmt.Println(randByte())
-	fmt.Println(randByte())
-	fmt.Println(randByte())
-	return
-	var opcode word = 0x8737
-
-	registers[0x7] = 0x0091 // x
-	registers[0x3] = 0x0097 // y
-
-	opcode8XY7(opcode)
-
-	fmt.Println(registers[0x7] == registers[0x3]-0x0091)
-	fmt.Println(registers[0xf] == 1)
 }
