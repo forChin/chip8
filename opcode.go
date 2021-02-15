@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 func getNextOpcode() word {
 	res := word(gameMemory[programCounter])
 	res <<= 8
@@ -8,6 +10,89 @@ func getNextOpcode() word {
 	programCounter += 2
 
 	return res
+}
+
+func executeOpcode(opcode word) {
+	switch (opcode&0xf000) {
+	case 0x00e0:
+		opcode00E0(opcode)
+	case 0x00ee:
+		opcode00EE(opcode)
+	case 0x1nnn:
+		opcode1NNN(opcode)
+	case 0x00e0:
+		opcode2NNN(opcode)
+	case 0x00e0:
+		opcode3XNN(opcode)
+	case 0x00e0:
+		opcode4XNN(opcode)
+	case 0x00e0:
+		opcode5XY0(opcode)
+	case 0x00e0:
+		opcode6XNN(opcode)
+	case 0x00e0:
+		opcode7XNN(opcode)
+	case 0x00e0:
+		opcode8XY0(opcode)
+	case 0x00e0:
+		opcode8XY1(opcode)
+	case 0x00e0:
+		opcode8XY2(opcode)
+	case 0x00e0:
+		opcode8XY3(opcode)
+	case 0x00e0:
+		opcode8XY4(opcode)
+	case 0x00e0:
+		opcode8XY5(opcode)
+	case 0x00e0:
+		opcode8XY6(opcode)
+	case 0x00e0:
+		opcode8XY7(opcode)
+	case 0x00e0:
+		opcode8XYE(opcode)
+	case 0x00e0:
+		opcode9XY0(opcode)
+	case 0x00e0:
+		opcodeANNN(opcode)
+	case 0x00e0:
+		opcodeBNNN(opcode)
+	case 0x00e0:
+		opcodeCXNN(opcode)
+	case 0x00e0:
+		opcodeDXYN(opcode)
+	case 0x00e0:
+		opcodeEX9E(opcode)
+	case 0x00e0:
+		opcodeEXA1(opcode)
+	case 0x00e0:
+		opcodeFX07(opcode)
+	case 0x00e0:
+		opcodeFX0A(opcode)
+	case 0x00e0:
+		opcodeFX15(opcode)
+	case 0x00e0:
+		opcodeFX18(opcode)
+	case 0x00e0:
+		opcodeFX1E(opcode)
+	case 0x00e0:
+		opcodeFX29(opcode)
+	case 0x00e0:
+		opcodeFX33(opcode)
+	case 0x00e0:
+		opcodeFX55(opcode)
+	case 0x00e0:
+		opcodeFX65(opcode)
+	default:
+		fmt.Printf("UNKOWN COMMAND: 0x%x\n", opcode)
+	}
+}
+
+func decodeoOpcode00E(opcode word) {
+	switch (opcode & 0x000f) {
+	case 0x000e:
+		opcode00e
+	case 0x0:
+	}
 }
 
 func opcode00E0(opcode word) {
@@ -212,7 +297,7 @@ func opcodeCXNN(opcode word) {
 
 // RECHECK
 func opcodeDXYN(opcode word) {
-	const scale byte = 10
+	const scale byte = 10 // to struct ?
 
 	regx := opcode & 0x0f00
 	regx >>= 8
@@ -245,7 +330,7 @@ func opcodeDXYN(opcode word) {
 				for i := byte(0); i < scale; i++ {
 					for j := byte(0); j < scale; j++ {
 						screenData[y+i][x+j][0] = color
-						screenData[y+i][x+j][1] = color
+						screenData[y+i][x+j][1] = color // really needed ?
 						screenData[y+i][x+j][2] = color
 					}
 				}

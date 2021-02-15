@@ -1,9 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
+	"log"
 	"math/rand"
 	"time"
+
+	"github.com/veandco/go-sdl2/sdl"
 )
 
 const (
@@ -21,7 +25,7 @@ var (
 	programCounter word
 
 	// [3] is RGB
-	screenData [64][32][3]byte // [32][64] ?
+	screenData [640][320][3]byte // [32][64] ?
 	keyState   []byte
 
 	delayTimer byte
@@ -56,4 +60,58 @@ func pressedKey() int {
 }
 
 func main() {
+	fmt.Print(0x0000f == 0x0f)
+	return
+	if err := run(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func run() error {
+	if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
+		return err
+	}
+	defer sdl.Quit()
+
+	wind, err := sdl.CreateWindow("Emulator", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, windowW, windowH, sdl.WINDOW_SHOWN)
+	if err != nil {
+		return err
+	}
+	defer wind.Destroy()
+
+	surf, err := wind.GetSurface()
+	if err != nil {
+		return err
+	}
+	surf.FillRect(nil, 0)
+
+	running := true
+	go func() {
+		for {
+			event := sdl.PollEvent()
+			if event != nil {
+				switch event.(type) {
+				case *sdl.QuitEvent:
+					fmt.Println("QUIT")
+					running = false
+					break
+				}
+			}
+		}
+	}()
+
+	for running {
+		for y := range screenData {
+			for x := range screenData[y] {
+				color := screenData[y][x][0]
+				rect := sdl.Rect{int32(x), int32(y), 1, 1}
+
+				surf.FillRect(&rect, uint32(color))
+			}
+		}
+		wind.UpdateSurface()
+		time.Sleep(time.Second)
+	}
+
+	return nil
 }
