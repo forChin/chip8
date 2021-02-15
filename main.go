@@ -60,7 +60,7 @@ func pressedKey() int {
 }
 
 func main() {
-	fmt.Print(0x0000f == 0x0f)
+	fmt.Println(0x1123&0xf == 0x3)
 	return
 	if err := run(); err != nil {
 		log.Fatal(err)

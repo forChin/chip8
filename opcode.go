@@ -14,56 +14,38 @@ func getNextOpcode() word {
 
 func executeOpcode(opcode word) {
 	switch opcode & 0xf000 {
-	case 0x0:
+	case 0x0000:
 		decodeOpcode00E(opcode)
-	case 0x1:
+	case 0x1000:
 		opcode1NNN(opcode)
-	case 0x2:
+	case 0x2000:
 		opcode2NNN(opcode)
-	case 0x3:
+	case 0x3000:
 		opcode3XNN(opcode)
-	case 0x4:
+	case 0x4000:
 		opcode4XNN(opcode)
-	case 0x5:
+	case 0x5000:
 		opcode5XY0(opcode)
-	case 0x6:
+	case 0x6000:
 		opcode6XNN(opcode)
-	case 0x7:
+	case 0x7000:
 		opcode7XNN(opcode)
-	case 0x8:
+	case 0x8000:
 		decodeOpcode8XY(opcode)
-	case 0x9:
+	case 0x9000:
 		opcode9XY0(opcode)
-	case 0xA:
+	case 0xA000:
 		opcodeANNN(opcode)
-	case 0xB:
+	case 0xB000:
 		opcodeBNNN(opcode)
-	case 0xC:
+	case 0xC000:
 		opcodeCXNN(opcode)
-	case 0xD:
+	case 0xD000:
 		opcodeDXYN(opcode)
-	case 0xE:
+	case 0xE000:
 		decodeOpcodeEX(opcode)
-	case 0x00e0:
-		opcodeEXA1(opcode)
-	case 0x00e0:
-		opcodeFX07(opcode)
-	case 0x00e0:
-		opcodeFX0A(opcode)
-	case 0x00e0:
-		opcodeFX15(opcode)
-	case 0x00e0:
-		opcodeFX18(opcode)
-	case 0x00e0:
-		opcodeFX1E(opcode)
-	case 0x00e0:
-		opcodeFX29(opcode)
-	case 0x00e0:
-		opcodeFX33(opcode)
-	case 0x00e0:
-		opcodeFX55(opcode)
-	case 0x00e0:
-		opcodeFX65(opcode)
+	case 0xF000:
+		decodeOpcodeFX(opcode)
 	default:
 		fmt.Printf("UNKOWN OPCODE: 0x%x\n", opcode)
 	}
@@ -100,6 +82,42 @@ func decodeOpcode8XY(opcode word) {
 		opcode8XY7(opcode)
 	case 0xe:
 		opcode8XYE(opcode)
+	default:
+		fmt.Printf("UNKOWN OPCODE: 0x%x\n", opcode)
+	}
+}
+
+func decodeOpcodeEX(opcode word) {
+	switch opcode & 0x00ff {
+	case 0x9e:
+		opcodeEX9E(opcode)
+	case 0xa1:
+		opcodeEXA1(opcode)
+	default:
+		fmt.Printf("UNKOWN OPCODE: 0x%x\n", opcode)
+	}
+}
+
+func decodeOpcodeFX(opcode word) {
+	switch opcode & 0x00ff {
+	case 0x07:
+		opcodeFX07(opcode)
+	case 0x0A:
+		opcodeFX0A(opcode)
+	case 0x15:
+		opcodeFX15(opcode)
+	case 0x18:
+		opcodeFX18(opcode)
+	case 0x1e:
+		opcodeFX1E(opcode)
+	case 0x29:
+		opcodeFX29(opcode)
+	case 0x33:
+		opcodeFX33(opcode)
+	case 0x55:
+		opcodeFX55(opcode)
+	case 0x65:
+		opcodeFX65(opcode)
 	default:
 		fmt.Printf("UNKOWN OPCODE: 0x%x\n", opcode)
 	}
