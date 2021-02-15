@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -11,25 +10,29 @@ import (
 )
 
 const (
-	windowW = 640
-	windowH = 320
+	windowW = 64
+	windowH = 32
+
+	gameROMPath = "./res/roms/Tank.ch8"
 )
 
 type word uint16
 
 var (
-	gameMemory     [0x100]byte // 0xfff ?
+	gameMemory     [0xfff]byte
 	registers      [16]byte
 	addressI       word
 	gameStack      stack
 	programCounter word
 
 	// [3] is RGB
-	screenData [640][320][3]byte // [32][64] ?
+	screenData [32][64][3]byte // [32][64] ?
 	keyState   []byte
 
 	delayTimer byte
 	soundTimer byte
+
+	surf *sdl.Surface
 )
 
 func init() {
@@ -40,7 +43,7 @@ func cpuReset() error {
 	addressI = 0
 	programCounter = 0x200
 
-	gameData, err := ioutil.ReadFile("file")
+	gameData, err := ioutil.ReadFile(gameROMPath)
 	if err != nil {
 		return err
 	}
@@ -60,46 +63,41 @@ func pressedKey() int {
 }
 
 func main() {
-	fmt.Println(0x1123&0xf == 0x3)
-	return
-	if err := run(); err != nil {
-		log.Fatal(err)
-	}
-}
+	cpuReset()
 
-func run() error {
 	if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
-		return err
+		log.Fatal(err)
 	}
 	defer sdl.Quit()
 
 	wind, err := sdl.CreateWindow("Emulator", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, windowW, windowH, sdl.WINDOW_SHOWN)
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
 	defer wind.Destroy()
 
-	surf, err := wind.GetSurface()
+	surf, err = wind.GetSurface()
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
-	surf.FillRect(nil, 0)
+	surf.FillRect(nil, 104)
 
 	running := true
-	go func() {
-		for {
-			event := sdl.PollEvent()
-			if event != nil {
-				switch event.(type) {
-				case *sdl.QuitEvent:
-					fmt.Println("QUIT")
-					running = false
-					break
-				}
-			}
-		}
-	}()
+	// go func() {
+	// 	for {
+	// 		event := sdl.PollEvent()
+	// 		if event != nil {
+	// 			switch event.(type) {
+	// 			case *sdl.QuitEvent:
+	// 				// fmt.Println("QUIT")
+	// 				running = false
+	// 				break
+	// 			}
+	// 		}
+	// 	}
+	// }()
 
+	// runtime.LockOSThread()
 	for running {
 		for y := range screenData {
 			for x := range screenData[y] {
@@ -111,7 +109,6 @@ func run() error {
 		}
 		wind.UpdateSurface()
 		time.Sleep(time.Second)
+		executeNextOpcode()
 	}
-
-	return nil
 }

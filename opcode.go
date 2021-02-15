@@ -1,9 +1,19 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
+
+func executeNextOpcode() {
+	next := getNextOpcode()
+	fmt.Printf("---: 0x%x\n", next)
+	executeOpcode(next)
+}
 
 func getNextOpcode() word {
-	res := word(gameMemory[programCounter])
+	firstOpcode := gameMemory[programCounter]
+	// fmt.Printf("--- FIRST: 0x%x\n", firstOpcode)
+	res := word(firstOpcode)
 	res <<= 8
 	res |= word(gameMemory[programCounter+1])
 
@@ -124,7 +134,7 @@ func decodeOpcodeFX(opcode word) {
 }
 
 func opcode00E0(opcode word) {
-	// clear screen
+	surf.FillRect(nil, 104)
 }
 
 func opcode00EE() {
@@ -325,7 +335,7 @@ func opcodeCXNN(opcode word) {
 
 // RECHECK
 func opcodeDXYN(opcode word) {
-	const scale byte = 10 // to struct ?
+	const scale byte = 1 // to struct ?
 
 	regx := opcode & 0x0f00
 	regx >>= 8
@@ -355,13 +365,16 @@ func opcodeDXYN(opcode word) {
 					registers[0xf] = 0
 				}
 
-				for i := byte(0); i < scale; i++ {
-					for j := byte(0); j < scale; j++ {
-						screenData[y+i][x+j][0] = color
-						screenData[y+i][x+j][1] = color // really needed ?
-						screenData[y+i][x+j][2] = color
-					}
-				}
+				// for i := byte(0); i < scale; i++ {
+				// 	for j := byte(0); j < scale; j++ {
+				screenData[y][x][0] = color
+				screenData[y][x][1] = color // really needed ?
+				screenData[y][x][2] = color
+				// screenData[y+i][x+j][0] = color
+				// screenData[y+i][x+j][1] = color // really needed ?
+				// screenData[y+i][x+j][2] = color
+				// 	}
+				// }
 			}
 		}
 	}
