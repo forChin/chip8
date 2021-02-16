@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"math/bits"
+	"time"
 )
 
 func executeNextOpcode() {
@@ -133,8 +135,10 @@ func decodeOpcodeFX(opcode word) {
 	}
 }
 
-func opcode00E0(opcode word) {
-	surf.FillRect(nil, 104)
+func opcode00E0(opcode word) { // clear display
+	for row := range screenData {
+		screenData[row] = 0
+	}
 }
 
 func opcode00EE() {
@@ -143,11 +147,13 @@ func opcode00EE() {
 
 func opcode1NNN(opcode word) {
 	programCounter = opcode & 0x0fff
+	// programCounter = opcode & 0x0fff - 2
 }
 
 func opcode2NNN(opcode word) {
 	gameStack.push(programCounter)
 	programCounter = opcode & 0x0fff
+	// programCounter = (opcode & 0x0fff) -2
 }
 
 func opcode3XNN(opcode word) {
@@ -185,7 +191,7 @@ func opcode5XY0(opcode word) {
 }
 
 func opcode6XNN(opcode word) {
-	regx := opcode & 0x0f00
+	regx := opcode & 0x0f00 // >> 8
 	regx >>= 8
 
 	nn := byte(opcode & 0x00ff)
@@ -248,11 +254,8 @@ func opcode8XY4(opcode word) {
 	regy := opcode & 0x00f0
 	regy >>= 4
 
-	sum := registers[regx] + registers[regy]
-	registers[regx] = sum
-	if sum > 255 {
-		registers[0xf] = 1
-	}
+	registers[0xf] = byte((uint16(registers[regx]) + uint16(registers[regy])>>8))
+	registers[regx] += registers[regy]
 }
 
 func opcode8XY5(opcode word) {
@@ -335,48 +338,29 @@ func opcodeCXNN(opcode word) {
 
 // RECHECK
 func opcodeDXYN(opcode word) {
-	const scale byte = 1 // to struct ?
-
 	regx := opcode & 0x0f00
 	regx >>= 8
-	xCoord := registers[regx] * scale
+	xCoord := registers[regx]
 
 	regy := opcode & 0x00f0
 	regy >>= 4
-	yCoord := registers[regy] * scale
+	yCoord := registers[regy]
 
-	height := opcode & 0x000f
+	height := byte(opcode & 0x000f)
 
-	for yline := word(0); yline < height; yline++ {
-		sprite := gameMemory[addressI+yline]
+	for row := byte(0); row < height; row++ {
+		y := (yCoord + row) % 32
 
-		for xpixel, xpixelinv := 0, 7; xpixel < 8; xpixel, xpixelinv = xpixel+1, xpixelinv+1 {
-			var mask byte = 1 << xpixelinv
-			if sprite&mask == 1 {
-				x := xCoord + byte(xpixel)*scale
-				y := yCoord + byte(yline)*scale
+		sprite := uint64(gameMemory[addressI+word(row)])
+		sprite = bits.RotateLeft64(sprite, 56-int(xCoord))
 
-				var color byte
-				if screenData[y][x][0] == 0 { // !=
-					color = 255
-					registers[0xf] = 1
-				} else {
-					color = 0 // remove ?
-					registers[0xf] = 0
-				}
-
-				// for i := byte(0); i < scale; i++ {
-				// 	for j := byte(0); j < scale; j++ {
-				screenData[y][x][0] = color
-				screenData[y][x][1] = color // really needed ?
-				screenData[y][x][2] = color
-				// screenData[y+i][x+j][0] = color
-				// screenData[y+i][x+j][1] = color // really needed ?
-				// screenData[y+i][x+j][2] = color
-				// 	}
-				// }
-			}
+		// If any 'on' pixels are going to be flipped, then set
+		// VF to 1 per the spec
+		if sprite&screenData[y] > 0 {
+			registers[0xf] = 1
 		}
+
+		screenData[y] ^= sprite
 	}
 }
 
@@ -389,6 +373,8 @@ func opcodeEX9E(opcode word) {
 	if keyState[key] == 1 {
 		programCounter += 2
 	}
+
+	keyState[key] = 0 // ? needed
 }
 
 func opcodeEXA1(opcode word) {
@@ -400,6 +386,8 @@ func opcodeEXA1(opcode word) {
 	if keyState[key] == 0 {
 		programCounter += 2
 	}
+
+	keyState[key] = 0 // ? needed
 }
 
 func opcodeFX07(opcode word) {
@@ -410,15 +398,21 @@ func opcodeFX07(opcode word) {
 }
 
 func opcodeFX0A(opcode word) {
+	running = false
+
 	regx := opcode & 0x0f00
 	regx >>= 8
 
-	keyInd := pressedKey()
+	for {
+		keyInd := pressedKey()
 
-	if keyInd == -1 {
-		programCounter -= 2
-	} else {
-		registers[regx] = byte(keyInd)
+		if keyInd != -1 {
+			registers[regx] = byte(keyInd)
+			running = true
+			break
+		}
+
+		time.Sleep(5 * time.Millisecond)
 	}
 }
 
@@ -454,7 +448,8 @@ func opcodeFX33(opcode word) {
 	regx >>= 8
 
 	hundreds := registers[regx] / 100
-	tens := registers[regx] % 100 / 10
+	// tens := registers[regx] % 100 / 10
+	tens := (registers[regx] / 10) % 10
 	ones := registers[regx] % 10
 
 	gameMemory[addressI] = hundreds
@@ -470,7 +465,7 @@ func opcodeFX55(opcode word) {
 		gameMemory[addressI+i] = registers[i]
 	}
 
-	addressI += regx + 1 // incremnt in loop
+	// addressI += regx + 1 // incremnt in loop
 }
 
 func opcodeFX65(opcode word) {
@@ -481,5 +476,5 @@ func opcodeFX65(opcode word) {
 		registers[i] = gameMemory[addressI+i]
 	}
 
-	addressI += regx + 1 // incremnt in loop
+	// addressI += regx + 1 // incremnt in loop
 }

@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	windowW = 64
-	windowH = 32
+	windowW = 640
+	windowH = 320
 
 	gameROMPath = "./res/roms/Tank.ch8"
 )
@@ -26,13 +26,12 @@ var (
 	programCounter word
 
 	// [3] is RGB
-	screenData [32][64][3]byte // [32][64] ?
-	keyState   []byte
+	screenData [32]uint64 // [32][64] ?
+	keyState   [16]byte
 
 	delayTimer byte
 	soundTimer byte
-
-	surf *sdl.Surface
+	running    bool
 )
 
 func init() {
@@ -47,7 +46,7 @@ func cpuReset() error {
 	if err != nil {
 		return err
 	}
-	copy(gameMemory[200:], gameData)
+	copy(gameMemory[0x200:], gameData)
 
 	return nil
 }
@@ -76,13 +75,13 @@ func main() {
 	}
 	defer wind.Destroy()
 
-	surf, err = wind.GetSurface()
+	surf, err := wind.GetSurface()
 	if err != nil {
 		log.Fatal(err)
 	}
-	surf.FillRect(nil, 104)
+	surf.FillRect(nil, 0)
 
-	running := true
+	// running = true
 	// go func() {
 	// 	for {
 	// 		event := sdl.PollEvent()
@@ -98,17 +97,22 @@ func main() {
 	// }()
 
 	// runtime.LockOSThread()
-	for running {
-		for y := range screenData {
-			for x := range screenData[y] {
-				color := screenData[y][x][0]
-				rect := sdl.Rect{int32(x), int32(y), 1, 1}
+	// for running {
+	// 	for y := range screenData {
+	// 		for x := range screenData[y] {
+	// 			color := uint32(screenData[y][x][0])
+	// 			if color > 0 {
+	// 				color = 0xffff0000
+	// 			} else {
+	// 				color = 0x0f0f00f0
+	// 			}
+	// 			rect := sdl.Rect{int32(x), int32(y), 1, 1}
 
-				surf.FillRect(&rect, uint32(color))
-			}
-		}
-		wind.UpdateSurface()
-		time.Sleep(time.Second)
-		executeNextOpcode()
-	}
+	// 			surf.FillRect(&rect, color)
+	// 		}
+	// 	}
+	// 	wind.UpdateSurface()
+	// 	// time.Sleep(time.Second)
+	// 	executeNextOpcode()
+	// }
 }
