@@ -6,12 +6,6 @@ import (
 	"time"
 )
 
-func executeNextOpcode() {
-	next := getNextOpcode()
-	fmt.Printf("---: 0x%x\n", next)
-	executeOpcode(next)
-}
-
 func getNextOpcode() word {
 	firstOpcode := gameMemory[programCounter]
 	// fmt.Printf("--- FIRST: 0x%x\n", firstOpcode)
