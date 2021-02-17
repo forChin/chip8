@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	windowW = 800
-	windowH = 600
+	windowW = 640
+	windowH = 320
 
 	gameROMPath = "./res/roms/PONG2"
 )
@@ -112,27 +112,15 @@ func main() {
 					y := row * scale
 					rect4 := sdl.Rect{int32(x), int32(y), scale, scale}
 					surf.FillRect(&rect4, 0x0f0f00f0)
-				}
+				} // else {
+				// 	x := col * scale
+				// 	y := row * scale
+				// 	rect4 := sdl.Rect{int32(x), int32(y), scale, scale}
+				// 	surf.FillRect(&rect4, 0)
+				// }
 			}
 		}
 		wind.UpdateSurface()
-
-		// for y := range screenData {
-		// 	for x := range screenData[y] {
-		// 		color := uint32(screenData[y][x][0])
-		// 		if color > 0 {
-		// 			color = 0xffff0000
-		// 		} else {
-		// 			color = 0x0f0f00f0
-		// 		}
-		// 		rect := sdl.Rect{int32(x), int32(y), 1, 1}
-
-		// 		surf.FillRect(&rect, color)
-		// 	}
-		// }
-		// wind.UpdateSurface()
-		// time.Sleep(time.Second)
-		// executeNextOpcode()
 	}
 }
 
