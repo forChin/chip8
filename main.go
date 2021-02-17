@@ -27,8 +27,7 @@ var (
 	gameStack      stack
 	programCounter word
 
-	// [3] is RGB
-	screenData [32]uint64 // [32][64] ?
+	screenData [32][64]byte
 	keyState   [16]byte
 
 	delayTimer byte
@@ -49,7 +48,7 @@ func cpuReset() error {
 	if err != nil {
 		return err
 	}
-	copy(gameMemory[0x200:], gameData)
+	copy(gameMemory[0x200:], gameData) // check len
 
 	return nil
 }
@@ -105,19 +104,14 @@ func main() {
 	const scale = 10
 	for running {
 		surf.FillRect(nil, 0)
-		for col := 0; col < 64; col++ {
-			for row := range screenData {
-				if pixelSetAt(screenData, col, row) {
-					x := col * scale
-					y := row * scale
-					rect4 := sdl.Rect{int32(x), int32(y), scale, scale}
+		for y := range screenData {
+			for x := range screenData[y] {
+				if screenData[y][x] > 0 {
+					xCoord := x * scale
+					yCoord := y * scale
+					rect4 := sdl.Rect{int32(xCoord), int32(yCoord), scale, scale}
 					surf.FillRect(&rect4, 0x0f0f00f0)
-				} // else {
-				// 	x := col * scale
-				// 	y := row * scale
-				// 	rect4 := sdl.Rect{int32(x), int32(y), scale, scale}
-				// 	surf.FillRect(&rect4, 0)
-				// }
+				}
 			}
 		}
 		wind.UpdateSurface()
@@ -137,7 +131,7 @@ func startTimers() {
 			}
 
 			if soundTimer > 0 {
-				fmt.Println("BEEP")
+				fmt.Println("BEEP") // make real sound
 			}
 		}
 	}

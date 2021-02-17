@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math/bits"
 	"time"
 )
 
@@ -130,8 +129,10 @@ func decodeOpcodeFX(opcode word) {
 }
 
 func opcode00E0(opcode word) { // clear display
-	for row := range screenData {
-		screenData[row] = 0
+	for y := range screenData {
+		for x := range screenData[y] {
+			screenData[y][x] = 0
+		}
 	}
 }
 
@@ -334,6 +335,8 @@ func opcodeCXNN(opcode word) {
 
 // RECHECK
 func opcodeDXYN(opcode word) {
+	registers[0xf] = 0
+
 	regx := opcode & 0x0f00
 	regx >>= 8
 	xCoord := registers[regx]
@@ -345,18 +348,24 @@ func opcodeDXYN(opcode word) {
 	height := byte(opcode & 0x000f)
 
 	for row := byte(0); row < height; row++ {
-		y := (yCoord + row) % 32
+		for i := byte(0); i < 8; i++ {
+			y := yCoord + row
+			x := xCoord + i
 
-		sprite := uint64(gameMemory[addressI+word(row)])
-		sprite = bits.RotateLeft64(sprite, 56-int(xCoord))
+			sprite := gameMemory[addressI+word(row)]
+			spriteBit := sprite & (128 >> i)
 
-		// If any 'on' pixels are going to be flipped, then set
-		// VF to 1 per the spec
-		if sprite&screenData[y] > 0 {
-			registers[0xf] = 1
+			// If any 'on' pixels are going to be flipped, then set
+			// VF to 1 per the spec
+			if spriteBit > 0 {
+				if screenData[y][x] > 0 {
+					registers[0xf] = 1
+					screenData[y][x] = 0
+				} else {
+					screenData[y][x] = 1
+				}
+			}
 		}
-
-		screenData[y] ^= sprite
 	}
 }
 
