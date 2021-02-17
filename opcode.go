@@ -59,7 +59,7 @@ func executeOpcode(opcode word) {
 	case 0xF000:
 		decodeOpcodeFX(opcode)
 	default:
-		fmt.Printf("UNKOWN OPCODE: 0x%x\n", opcode)
+		fmt.Printf("UNKOWN OPCODE: 0x%x\n", opcode) // panic or fatal
 	}
 }
 
@@ -267,6 +267,8 @@ func opcode8XY5(opcode word) {
 
 	if registers[regx] < registers[regy] {
 		registers[0xf] = 0
+	} else {
+		registers[0xf] = 1
 	}
 
 	registers[regx] = registers[regx] - registers[regy]
