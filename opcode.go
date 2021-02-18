@@ -375,11 +375,11 @@ func opcodeEX9E(opcode word) {
 
 	key := registers[regx]
 
-	if keyState[key] == 1 {
+	if keyState[key] {
 		programCounter += 2
 	}
 
-	keyState[key] = 0 // ? needed
+	keyState[key] = false
 }
 
 func opcodeEXA1(opcode word) {
@@ -388,11 +388,11 @@ func opcodeEXA1(opcode word) {
 
 	key := registers[regx]
 
-	if keyState[key] == 0 {
+	if !keyState[key] {
 		programCounter += 2
 	}
 
-	keyState[key] = 0 // ? needed
+	keyState[key] = false
 }
 
 func opcodeFX07(opcode word) {

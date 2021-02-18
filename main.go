@@ -28,7 +28,7 @@ var (
 	programCounter word
 
 	screenData [32][64]byte
-	keyState   [16]byte
+	keyState   [16]bool
 
 	delayTimer byte
 	soundTimer byte
@@ -55,7 +55,7 @@ func cpuReset() error {
 
 func pressedKey() int {
 	for i, k := range keyState {
-		if k != 0 {
+		if k {
 			return i
 		}
 	}
