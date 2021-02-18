@@ -91,11 +91,22 @@ func main() {
 		for {
 			event := sdl.PollEvent()
 			if event != nil {
-				switch event.(type) {
+				switch t := event.(type) {
 				case *sdl.QuitEvent:
 					fmt.Println("QUIT")
 					running = false
 					break
+				case *sdl.KeyboardEvent:
+					switch t.Keysym.Sym {
+					case sdl.K_w: // has been released or pressed
+						keyState[1] = t.State == sdl.PRESSED
+					case sdl.K_s:
+						keyState[4] = t.State == sdl.PRESSED
+					case sdl.K_a:
+						keyState[5] = t.State == sdl.PRESSED
+					case sdl.K_d:
+						keyState[6] = t.State == sdl.PRESSED
+					}
 				}
 			}
 		}
