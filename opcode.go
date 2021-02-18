@@ -349,8 +349,11 @@ func opcodeDXYN(opcode word) {
 
 	for row := byte(0); row < height; row++ {
 		for i := byte(0); i < 8; i++ {
-			y := yCoord + row
-			x := xCoord + i
+			y := (yCoord + row)
+			y %= byte(len(screenData)) // handling out of range
+
+			x := (xCoord + i)
+			x %= byte(len(screenData[0]))
 
 			sprite := gameMemory[addressI+word(row)]
 			spriteBit := sprite & (128 >> i)
