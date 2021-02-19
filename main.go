@@ -84,80 +84,60 @@ func cpuReset() error {
 	return nil
 }
 
-func pressedKey() int {
-	for i, k := range keyState {
-		if k {
-			return i
-		}
-	}
-
-	return -1
-}
-
 func main() {
 	cpuReset()
-
-	go startTimers()
-	go startMachine()
 
 	if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
 		log.Fatal(err)
 	}
 	defer sdl.Quit()
 
-	wind, err := sdl.CreateWindow("Emulator", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, windowW, windowH, sdl.WINDOW_SHOWN)
+	wind, err := sdl.CreateWindow(
+		"Chip8 Emulator", sdl.WINDOWPOS_UNDEFINED,
+		sdl.WINDOWPOS_UNDEFINED, windowW,
+		windowH, sdl.WINDOW_SHOWN,
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer wind.Destroy()
 
-	surf, err := wind.GetSurface()
+	rend, err := sdl.CreateRenderer(wind, -1, sdl.RENDERER_ACCELERATED)
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer rend.Destroy()
 
-	running = true
-	go func() { // not in own goroutine ?
-		for {
-			event := sdl.PollEvent()
-			if event != nil {
-				switch t := event.(type) {
-				case *sdl.QuitEvent:
-					running = false
-					return
-				case *sdl.KeyboardEvent:
-					updateKey(t.Keysym.Sym, t.State == sdl.PRESSED)
-				}
-			}
-		}
-	}()
+	rend.Clear()
+	rend.SetDrawBlendMode(sdl.BLENDMODE_BLEND)
+
+	go startTimers()
+	go startMachine()
+	go handleKeys()
 
 	const scale = 10
 	fps := 60
 	frameLen := time.Duration(1000/fps) * time.Millisecond
 
+	running = true
 	for running {
-		surf.FillRect(nil, 0)
+		rend.SetDrawColor(0, 0, 0, 128)
+		rend.FillRect(nil)
+
 		for y := range screenData {
 			for x := range screenData[y] {
 				if screenData[y][x] > 0 {
 					xCoord := x * scale
 					yCoord := y * scale
 					rect := sdl.Rect{int32(xCoord), int32(yCoord), scale, scale}
-					surf.FillRect(&rect, 0xffffffff)
+					rend.SetDrawColor(255, 255, 255, 255)
+					rend.FillRect(&rect)
 				}
 			}
 		}
-		wind.UpdateSurface()
-		time.Sleep(frameLen)
-	}
-}
 
-func updateKey(keyCode sdl.Keycode, state bool) {
-	for i, k := range keyMap {
-		if keyCode == k {
-			keyState[i] = state
-		}
+		rend.Present()
+		time.Sleep(frameLen)
 	}
 }
 
@@ -189,4 +169,27 @@ func startMachine() {
 		executeOpcode(next)
 	}
 
+}
+
+func handleKeys() {
+	for {
+		event := sdl.PollEvent()
+		if event != nil {
+			switch t := event.(type) {
+			case *sdl.QuitEvent:
+				running = false
+				return
+			case *sdl.KeyboardEvent:
+				updateKey(t.Keysym.Sym, t.State == sdl.PRESSED)
+			}
+		}
+	}
+}
+
+func updateKey(keyCode sdl.Keycode, state bool) {
+	for i, k := range keyMap {
+		if keyCode == k {
+			keyState[i] = state
+		}
+	}
 }

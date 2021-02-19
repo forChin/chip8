@@ -424,6 +424,16 @@ func opcodeFX0A(opcode word) {
 	}
 }
 
+func pressedKey() int {
+	for i, k := range keyState {
+		if k {
+			return i
+		}
+	}
+
+	return -1
+}
+
 func opcodeFX15(opcode word) {
 	regx := opcode & 0x0f00
 	regx >>= 8
