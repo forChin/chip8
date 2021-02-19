@@ -135,6 +135,9 @@ func main() {
 	}()
 
 	const scale = 10
+	fps := 60
+	frameLen := time.Duration(1000/fps) * time.Millisecond
+
 	for running {
 		surf.FillRect(nil, 0)
 		for y := range screenData {
@@ -148,6 +151,7 @@ func main() {
 			}
 		}
 		wind.UpdateSurface()
+		time.Sleep(frameLen)
 	}
 }
 
@@ -179,7 +183,7 @@ func startTimers() {
 }
 
 func startMachine() {
-	ticker := time.NewTicker(3 * time.Millisecond)
+	ticker := time.NewTicker(3 * time.Millisecond) // ~300Hz (from config)
 
 	for range ticker.C {
 		next := getNextOpcode()
