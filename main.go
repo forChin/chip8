@@ -115,7 +115,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	surf.FillRect(nil, 0)
 
 	running = true
 	go func() { // not in own goroutine ?
@@ -124,9 +123,8 @@ func main() {
 			if event != nil {
 				switch t := event.(type) {
 				case *sdl.QuitEvent:
-					fmt.Println("QUIT")
 					running = false
-					break
+					return
 				case *sdl.KeyboardEvent:
 					updateKey(t.Keysym.Sym, t.State == sdl.PRESSED)
 				}
@@ -145,8 +143,8 @@ func main() {
 				if screenData[y][x] > 0 {
 					xCoord := x * scale
 					yCoord := y * scale
-					rect4 := sdl.Rect{int32(xCoord), int32(yCoord), scale, scale}
-					surf.FillRect(&rect4, 0x0f0f00f0)
+					rect := sdl.Rect{int32(xCoord), int32(yCoord), scale, scale}
+					surf.FillRect(&rect, 0xffffffff)
 				}
 			}
 		}
