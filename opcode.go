@@ -6,9 +6,7 @@ import (
 )
 
 func getNextOpcode() word {
-	firstOpcode := gameMemory[programCounter]
-	// fmt.Printf("--- FIRST: 0x%x\n", firstOpcode)
-	res := word(firstOpcode)
+	res := word(gameMemory[programCounter])
 	res <<= 8
 	res |= word(gameMemory[programCounter+1])
 
