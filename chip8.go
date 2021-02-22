@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"time"
 
 	"github.com/veandco/go-sdl2/sdl"
@@ -44,16 +43,16 @@ type chip8 struct {
 	addressI       word
 	gameStack      stack
 	programCounter word
+	keyState       [16]bool
 
-	screenData [32][64]byte
-	keyState   [16]bool
+	delayTimer       byte
+	soundTimer       byte
+	opcodesPerSecond time.Duration
 
-	delayTimer byte
-	soundTimer byte
-	running    bool
+	running bool
 }
 
-func newChip8(cfg config) *chip8 {
+func newChip8(windowW, windowH int) *chip8 {
 	ch8 := chip8{}
 	ch8.addressI = 0
 	ch8.programCounter = 0x200
@@ -85,62 +84,11 @@ func (c *chip8) run() {
 	go c.handleKeys()
 	go c.startRender()
 
-	ticker := time.NewTicker(3 * time.Millisecond) // ~300Hz (from config)
+	ticker := time.NewTicker(c.opcodesPerSecond * time.Millisecond)
 	for range ticker.C {
 		next := getNextOpcode()
 		fmt.Printf("0x%x\n", next)
 		executeOpcode(next)
-	}
-}
-
-func (c *chip8) startRender() {
-	if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
-		log.Fatal(err)
-	}
-	defer sdl.Quit()
-
-	wind, err := sdl.CreateWindow(
-		"Chip8 Emulator", sdl.WINDOWPOS_UNDEFINED,
-		sdl.WINDOWPOS_UNDEFINED, windowW,
-		windowH, sdl.WINDOW_SHOWN,
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer wind.Destroy()
-
-	rend, err := sdl.CreateRenderer(wind, -1, sdl.RENDERER_ACCELERATED)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer rend.Destroy()
-
-	rend.Clear()
-	rend.SetDrawBlendMode(sdl.BLENDMODE_BLEND)
-
-	const scale = 10
-	const fps = 60
-	frameLen := time.Duration(1000/fps) * time.Millisecond
-
-	c.running = true
-	for c.running {
-		rend.SetDrawColor(0, 0, 0, 128)
-		rend.FillRect(nil)
-
-		for y := range c.screenData {
-			for x := range c.screenData[y] {
-				if c.screenData[y][x] > 0 {
-					xCoord := x * scale
-					yCoord := y * scale
-					rect := sdl.Rect{int32(xCoord), int32(yCoord), scale, scale}
-					rend.SetDrawColor(255, 255, 255, 255)
-					rend.FillRect(&rect)
-				}
-			}
-		}
-
-		rend.Present()
-		time.Sleep(frameLen)
 	}
 }
 
