@@ -5,416 +5,416 @@ import (
 	"time"
 )
 
-func getNextOpcode() word {
-	res := word(gameMemory[programCounter])
+func (c *chip8) getNextOpcode() word {
+	res := word(c.gameMemory[c.programCounter])
 	res <<= 8
-	res |= word(gameMemory[programCounter+1])
+	res |= word(c.gameMemory[c.programCounter+1])
 
-	programCounter += 2
+	c.programCounter += 2
 
 	return res
 }
 
-func executeOpcode(opcode word) {
+func (c *chip8) executeOpcode(opcode word) {
 	switch opcode & 0xf000 {
 	case 0x0000:
-		decodeOpcode00E(opcode)
+		c.decodeOpcode00E(opcode)
 	case 0x1000:
-		opcode1NNN(opcode)
+		c.opcode1NNN(opcode)
 	case 0x2000:
-		opcode2NNN(opcode)
+		c.opcode2NNN(opcode)
 	case 0x3000:
-		opcode3XNN(opcode)
+		c.opcode3XNN(opcode)
 	case 0x4000:
-		opcode4XNN(opcode)
+		c.opcode4XNN(opcode)
 	case 0x5000:
-		opcode5XY0(opcode)
+		c.opcode5XY0(opcode)
 	case 0x6000:
-		opcode6XNN(opcode)
+		c.opcode6XNN(opcode)
 	case 0x7000:
-		opcode7XNN(opcode)
+		c.opcode7XNN(opcode)
 	case 0x8000:
-		decodeOpcode8XY(opcode)
+		c.decodeOpcode8XY(opcode)
 	case 0x9000:
-		opcode9XY0(opcode)
+		c.opcode9XY0(opcode)
 	case 0xA000:
-		opcodeANNN(opcode)
+		c.opcodeANNN(opcode)
 	case 0xB000:
-		opcodeBNNN(opcode)
+		c.opcodeBNNN(opcode)
 	case 0xC000:
-		opcodeCXNN(opcode)
+		c.opcodeCXNN(opcode)
 	case 0xD000:
-		opcodeDXYN(opcode)
+		c.opcodeDXYN(opcode)
 	case 0xE000:
-		decodeOpcodeEX(opcode)
+		c.decodeOpcodeEX(opcode)
 	case 0xF000:
-		decodeOpcodeFX(opcode)
+		c.decodeOpcodeFX(opcode)
 	default:
 		fmt.Printf("UNKOWN OPCODE: 0x%x\n", opcode) // panic or fatal
 	}
 }
 
-func decodeOpcode00E(opcode word) {
+func (c *chip8) decodeOpcode00E(opcode word) {
 	switch opcode & 0x000f {
 	case 0xe:
-		opcode00EE()
+		c.opcode00EE()
 	case 0x0:
-		opcode00E0(opcode)
+		c.opcode00E0(opcode)
 	default:
 		fmt.Printf("UNKOWN OPCODE: 0x%x\n", opcode)
 	}
 }
 
-func decodeOpcode8XY(opcode word) {
+func (c *chip8) decodeOpcode8XY(opcode word) {
 	switch opcode & 0x000f {
 	case 0x0:
-		opcode8XY0(opcode)
+		c.opcode8XY0(opcode)
 	case 0x1:
-		opcode8XY1(opcode)
+		c.opcode8XY1(opcode)
 	case 0x2:
-		opcode8XY2(opcode)
+		c.opcode8XY2(opcode)
 	case 0x3:
-		opcode8XY3(opcode)
+		c.opcode8XY3(opcode)
 	case 0x4:
-		opcode8XY4(opcode)
+		c.opcode8XY4(opcode)
 	case 0x5:
-		opcode8XY5(opcode)
+		c.opcode8XY5(opcode)
 	case 0x6:
-		opcode8XY6(opcode)
+		c.opcode8XY6(opcode)
 	case 0x7:
-		opcode8XY7(opcode)
+		c.opcode8XY7(opcode)
 	case 0xe:
-		opcode8XYE(opcode)
+		c.opcode8XYE(opcode)
 	default:
 		fmt.Printf("UNKOWN OPCODE: 0x%x\n", opcode)
 	}
 }
 
-func decodeOpcodeEX(opcode word) {
+func (c *chip8) decodeOpcodeEX(opcode word) {
 	switch opcode & 0x00ff {
 	case 0x9e:
-		opcodeEX9E(opcode)
+		c.opcodeEX9E(opcode)
 	case 0xa1:
-		opcodeEXA1(opcode)
+		c.opcodeEXA1(opcode)
 	default:
 		fmt.Printf("UNKOWN OPCODE: 0x%x\n", opcode)
 	}
 }
 
-func decodeOpcodeFX(opcode word) {
+func (c *chip8) decodeOpcodeFX(opcode word) {
 	switch opcode & 0x00ff {
 	case 0x07:
-		opcodeFX07(opcode)
+		c.opcodeFX07(opcode)
 	case 0x0A:
-		opcodeFX0A(opcode)
+		c.opcodeFX0A(opcode)
 	case 0x15:
-		opcodeFX15(opcode)
+		c.opcodeFX15(opcode)
 	case 0x18:
-		opcodeFX18(opcode)
+		c.opcodeFX18(opcode)
 	case 0x1e:
-		opcodeFX1E(opcode)
+		c.opcodeFX1E(opcode)
 	case 0x29:
-		opcodeFX29(opcode)
+		c.opcodeFX29(opcode)
 	case 0x33:
-		opcodeFX33(opcode)
+		c.opcodeFX33(opcode)
 	case 0x55:
-		opcodeFX55(opcode)
+		c.opcodeFX55(opcode)
 	case 0x65:
-		opcodeFX65(opcode)
+		c.opcodeFX65(opcode)
 	default:
 		fmt.Printf("UNKOWN OPCODE: 0x%x\n", opcode)
 	}
 }
 
-func opcode00E0(opcode word) { // clear display
-	for y := range screenData {
-		for x := range screenData[y] {
-			screenData[y][x] = 0
+func (c *chip8) opcode00E0(opcode word) { // clear display
+	for y := range c.screen.pixels {
+		for x := range c.screen.pixels[y] {
+			c.screen.pixels[y][x] = 0
 		}
 	}
 }
 
-func opcode00EE() {
-	programCounter = gameStack.pop()
+func (c *chip8) opcode00EE() {
+	c.programCounter = c.gameStack.pop()
 }
 
-func opcode1NNN(opcode word) {
-	programCounter = opcode & 0x0fff
+func (c *chip8) opcode1NNN(opcode word) {
+	c.programCounter = opcode & 0x0fff
 	// programCounter = opcode & 0x0fff - 2
 }
 
-func opcode2NNN(opcode word) {
-	gameStack.push(programCounter)
-	programCounter = opcode & 0x0fff
+func (c *chip8) opcode2NNN(opcode word) {
+	c.gameStack.push(c.programCounter)
+	c.programCounter = opcode & 0x0fff
 	// programCounter = (opcode & 0x0fff) -2
 }
 
-func opcode3XNN(opcode word) {
+func (c *chip8) opcode3XNN(opcode word) {
 	regx := opcode & 0x0f00
 	regx >>= 8
 
 	nn := opcode & 0x00ff
 
-	if registers[regx] == byte(nn) {
-		programCounter += 2
+	if c.registers[regx] == byte(nn) {
+		c.programCounter += 2
 	}
 }
 
-func opcode4XNN(opcode word) {
+func (c *chip8) opcode4XNN(opcode word) {
 	regx := opcode & 0x0f00
 	regx >>= 8
 
 	nn := opcode & 0x00ff
 
-	if registers[regx] != byte(nn) {
-		programCounter += 2
+	if c.registers[regx] != byte(nn) {
+		c.programCounter += 2
 	}
 }
 
-func opcode5XY0(opcode word) {
+func (c *chip8) opcode5XY0(opcode word) {
 	regx := opcode & 0x0f00
 	regx >>= 8
 
 	regy := opcode & 0x00f0
 	regy >>= 4
 
-	if registers[regx] == registers[regy] {
-		programCounter += 2
+	if c.registers[regx] == c.registers[regy] {
+		c.programCounter += 2
 	}
 }
 
-func opcode6XNN(opcode word) {
+func (c *chip8) opcode6XNN(opcode word) {
 	regx := opcode & 0x0f00 // >> 8
 	regx >>= 8
 
 	nn := byte(opcode & 0x00ff)
-	registers[regx] = nn
+	c.registers[regx] = nn
 }
 
-func opcode7XNN(opcode word) {
+func (c *chip8) opcode7XNN(opcode word) {
 	regx := opcode & 0x0f00
 	regx >>= 8
 
 	nn := byte(opcode & 0x00ff)
 
-	registers[regx] += nn
+	c.registers[regx] += nn
 }
 
-func opcode8XY0(opcode word) {
+func (c *chip8) opcode8XY0(opcode word) {
 	regx := opcode & 0x0f00
 	regx >>= 8
 
 	regy := opcode & 0x00f0
 	regy >>= 4
 
-	registers[regx] = registers[regy]
+	c.registers[regx] = c.registers[regy]
 }
 
-func opcode8XY1(opcode word) {
+func (c *chip8) opcode8XY1(opcode word) {
 	regx := opcode & 0x0f00
 	regx >>= 8
 
 	regy := opcode & 0x00f0
 	regy >>= 4
 
-	registers[regx] |= registers[regy]
+	c.registers[regx] |= c.registers[regy]
 }
 
-func opcode8XY2(opcode word) {
+func (c *chip8) opcode8XY2(opcode word) {
 	regx := opcode & 0x0f00
 	regx >>= 8
 
 	regy := opcode & 0x00f0
 	regy >>= 4
 
-	registers[regx] &= registers[regy]
+	c.registers[regx] &= c.registers[regy]
 }
 
-func opcode8XY3(opcode word) {
+func (c *chip8) opcode8XY3(opcode word) {
 	regx := opcode & 0x0f00
 	regx >>= 8
 
 	regy := opcode & 0x00f0
 	regy >>= 4
 
-	registers[regx] ^= registers[regy]
+	c.registers[regx] ^= c.registers[regy]
 }
 
-func opcode8XY4(opcode word) {
+func (c *chip8) opcode8XY4(opcode word) {
 	regx := opcode & 0x0f00
 	regx >>= 8
 
 	regy := opcode & 0x00f0
 	regy >>= 4
 
-	registers[0xf] = byte((uint16(registers[regx]) + uint16(registers[regy])>>8))
-	registers[regx] += registers[regy]
+	c.registers[0xf] = byte((uint16(c.registers[regx]) + uint16(c.registers[regy])>>8))
+	c.registers[regx] += c.registers[regy]
 }
 
-func opcode8XY5(opcode word) {
+func (c *chip8) opcode8XY5(opcode word) {
 	regx := opcode & 0x0f00
 	regx >>= 8
 
 	regy := opcode & 0x00f0
 	regy >>= 4
 
-	if registers[regx] < registers[regy] {
-		registers[0xf] = 0
+	if c.registers[regx] < c.registers[regy] {
+		c.registers[0xf] = 0
 	} else {
-		registers[0xf] = 1
+		c.registers[0xf] = 1
 	}
 
-	registers[regx] = registers[regx] - registers[regy]
+	c.registers[regx] = c.registers[regx] - c.registers[regy]
 }
 
-func opcode8XY6(opcode word) {
+func (c *chip8) opcode8XY6(opcode word) {
 	regx := opcode & 0x0f00
 	regx >>= 8
 
-	registers[0xf] = registers[regx] & 0x1
+	c.registers[0xf] = c.registers[regx] & 0x1
 
-	registers[regx] >>= 1
+	c.registers[regx] >>= 1
 }
 
-func opcode8XY7(opcode word) {
+func (c *chip8) opcode8XY7(opcode word) {
 	regx := opcode & 0x0f00
 	regx >>= 8
 
 	regy := opcode & 0x00f0
 	regy >>= 4
 
-	if registers[regy] < registers[regx] {
-		registers[0xf] = 0
+	if c.registers[regy] < c.registers[regx] {
+		c.registers[0xf] = 0
 	} else {
-		registers[0xf] = 1
+		c.registers[0xf] = 1
 	}
 
-	registers[regx] = registers[regy] - registers[regx]
+	c.registers[regx] = c.registers[regy] - c.registers[regx]
 }
 
-func opcode8XYE(opcode word) {
+func (c *chip8) opcode8XYE(opcode word) {
 	regx := opcode & 0x0f00
 	regx >>= 8
 
-	registers[0xf] = registers[regx] >> 7
+	c.registers[0xf] = c.registers[regx] >> 7
 
-	registers[regx] <<= 1
+	c.registers[regx] <<= 1
 }
 
-func opcode9XY0(opcode word) {
+func (c *chip8) opcode9XY0(opcode word) {
 	regx := opcode & 0x0f00
 	regx >>= 8
 
 	regy := opcode & 0x00f0
 	regy >>= 4
 
-	if registers[regx] != registers[regy] {
-		programCounter += 2
+	if c.registers[regx] != c.registers[regy] {
+		c.programCounter += 2
 	}
 }
 
-func opcodeANNN(opcode word) {
-	addressI = opcode & 0x0fff
+func (c *chip8) opcodeANNN(opcode word) {
+	c.addressI = opcode & 0x0fff
 }
 
-func opcodeBNNN(opcode word) {
+func (c *chip8) opcodeBNNN(opcode word) {
 	nnn := opcode & 0x0fff
-	programCounter = nnn + word(registers[0])
+	c.programCounter = nnn + word(c.registers[0])
 }
 
-func opcodeCXNN(opcode word) {
+func (c *chip8) opcodeCXNN(opcode word) {
 	regx := opcode & 0x0f00
 	regx >>= 8
 
 	nn := byte(opcode & 0x00ff)
 
-	registers[regx] = randByte() & nn
+	c.registers[regx] = randByte() & nn
 }
 
 // RECHECK
-func opcodeDXYN(opcode word) {
-	registers[0xf] = 0
+func (c *chip8) opcodeDXYN(opcode word) {
+	c.registers[0xf] = 0
 
 	regx := opcode & 0x0f00
 	regx >>= 8
-	xCoord := registers[regx]
+	xCoord := c.registers[regx]
 
 	regy := opcode & 0x00f0
 	regy >>= 4
-	yCoord := registers[regy]
+	yCoord := c.registers[regy]
 
 	height := byte(opcode & 0x000f)
 
 	for row := byte(0); row < height; row++ {
 		for i := byte(0); i < 8; i++ {
 			y := (yCoord + row)
-			y %= byte(len(screenData)) // handling out of range
+			y %= byte(len(c.screen.pixels)) // handling out of range
 
 			x := (xCoord + i)
-			x %= byte(len(screenData[0]))
+			x %= byte(len(c.screen.pixels[0]))
 
-			sprite := gameMemory[addressI+word(row)]
+			sprite := c.gameMemory[c.addressI+word(row)]
 			spriteBit := sprite & (128 >> i)
 
 			// If any 'on' pixels are going to be flipped, then set
 			// VF to 1 per the spec
 			if spriteBit > 0 {
-				if screenData[y][x] > 0 {
-					registers[0xf] = 1
-					screenData[y][x] = 0
+				if c.screen.pixels[y][x] > 0 {
+					c.registers[0xf] = 1
+					c.screen.pixels[y][x] = 0
 				} else {
-					screenData[y][x] = 1
+					c.screen.pixels[y][x] = 1
 				}
 			}
 		}
 	}
 }
 
-func opcodeEX9E(opcode word) {
+func (c *chip8) opcodeEX9E(opcode word) {
 	regx := opcode & 0x0f00
 	regx >>= 8
 
-	key := registers[regx]
+	key := c.registers[regx]
 
-	if keyState[key] {
-		programCounter += 2
+	if c.keyState[key] {
+		c.programCounter += 2
 	}
 
-	keyState[key] = false
+	c.keyState[key] = false
 }
 
-func opcodeEXA1(opcode word) {
+func (c *chip8) opcodeEXA1(opcode word) {
 	regx := opcode & 0x0f00
 	regx >>= 8
 
-	key := registers[regx]
+	key := c.registers[regx]
 
-	if !keyState[key] {
-		programCounter += 2
+	if !c.keyState[key] {
+		c.programCounter += 2
 	}
 
-	keyState[key] = false
+	c.keyState[key] = false
 }
 
-func opcodeFX07(opcode word) {
+func (c *chip8) opcodeFX07(opcode word) {
 	regx := opcode & 0x0f00
 	regx >>= 8
 
-	registers[regx] = delayTimer
+	c.registers[regx] = c.delayTimer
 }
 
-func opcodeFX0A(opcode word) {
-	running = false
+func (c *chip8) opcodeFX0A(opcode word) {
+	c.running = false
 
 	regx := opcode & 0x0f00
 	regx >>= 8
 
 	for {
-		keyInd := pressedKey()
+		keyInd := c.pressedKey()
 
 		if keyInd != -1 {
-			registers[regx] = byte(keyInd)
-			running = true
+			c.registers[regx] = byte(keyInd)
+			c.running = true
 			break
 		}
 
@@ -422,8 +422,8 @@ func opcodeFX0A(opcode word) {
 	}
 }
 
-func pressedKey() int {
-	for i, k := range keyState {
+func (c *chip8) pressedKey() int {
+	for i, k := range c.keyState {
 		if k {
 			return i
 		}
@@ -432,64 +432,64 @@ func pressedKey() int {
 	return -1
 }
 
-func opcodeFX15(opcode word) {
+func (c *chip8) opcodeFX15(opcode word) {
 	regx := opcode & 0x0f00
 	regx >>= 8
 
-	delayTimer = registers[regx]
+	c.delayTimer = c.registers[regx]
 }
 
-func opcodeFX18(opcode word) {
+func (c *chip8) opcodeFX18(opcode word) {
 	regx := opcode & 0x0f00
 	regx >>= 8
 
-	soundTimer = registers[regx]
+	c.soundTimer = c.registers[regx]
 }
 
-func opcodeFX1E(opcode word) {
+func (c *chip8) opcodeFX1E(opcode word) {
 	regx := opcode & 0x0f00
 	regx >>= 8
 
-	addressI += word(registers[regx])
+	c.addressI += word(c.registers[regx])
 }
 
-func opcodeFX29(opcode word) {
+func (c *chip8) opcodeFX29(opcode word) {
 	regx := opcode & 0x0f00
 	regx >>= 8
-	addressI = word(registers[regx]) * 5
+	c.addressI = word(c.registers[regx]) * 5
 }
 
-func opcodeFX33(opcode word) {
+func (c *chip8) opcodeFX33(opcode word) {
 	regx := opcode & 0x0f00
 	regx >>= 8
 
-	hundreds := registers[regx] / 100
+	hundreds := c.registers[regx] / 100
 	// tens := registers[regx] % 100 / 10
-	tens := (registers[regx] / 10) % 10
-	ones := registers[regx] % 10
+	tens := (c.registers[regx] / 10) % 10
+	ones := c.registers[regx] % 10
 
-	gameMemory[addressI] = hundreds
-	gameMemory[addressI+1] = tens
-	gameMemory[addressI+2] = ones
+	c.gameMemory[c.addressI] = hundreds
+	c.gameMemory[c.addressI+1] = tens
+	c.gameMemory[c.addressI+2] = ones
 }
 
-func opcodeFX55(opcode word) {
+func (c *chip8) opcodeFX55(opcode word) {
 	regx := opcode & 0x0f00
 	regx >>= 8
 
 	for i := word(0); i <= regx; i++ {
-		gameMemory[addressI+i] = registers[i]
+		c.gameMemory[c.addressI+i] = c.registers[i]
 	}
 
 	// addressI += regx + 1 // incremnt in loop
 }
 
-func opcodeFX65(opcode word) {
+func (c *chip8) opcodeFX65(opcode word) {
 	regx := opcode & 0x0f00
 	regx >>= 8
 
 	for i := word(0); i <= regx; i++ {
-		registers[i] = gameMemory[addressI+i]
+		c.registers[i] = c.gameMemory[c.addressI+i]
 	}
 
 	// addressI += regx + 1 // incremnt in loop
