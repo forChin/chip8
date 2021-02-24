@@ -8,16 +8,16 @@ import (
 )
 
 type display struct {
-	windowW    int32
-	windowH    int32
-	screenData [32][64]byte
-	scale      int32
-	renderer   *sdl.Renderer
+	windowW  int32
+	windowH  int32
+	pixels   [32][64]byte
+	scale    int32
+	renderer *sdl.Renderer
 }
 
 func newDisplay(width, height int32) *display {
 	d := display{windowW: width, windowH: height}
-	d.scale = int32(len(d.screenData)) / width
+	d.scale = int32(len(d.pixels)) / width
 
 	return &d
 }
@@ -60,9 +60,9 @@ func (d *display) render() {
 	d.renderer.SetDrawColor(0, 0, 0, 128)
 	d.renderer.FillRect(nil)
 
-	for y := range d.screenData {
-		for x := range d.screenData[y] {
-			if d.screenData[y][x] > 0 {
+	for y := range d.pixels {
+		for x := range d.pixels[y] {
+			if d.pixels[y][x] > 0 {
 				xCoord := int32(x) * d.scale
 				yCoord := int32(y) * d.scale
 				rect := sdl.Rect{xCoord, yCoord, d.scale, d.scale}
