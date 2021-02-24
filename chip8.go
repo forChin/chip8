@@ -54,12 +54,12 @@ type chip8 struct {
 	running bool
 }
 
-func newChip8(windowW, windowH int32, opcodesPerSec time.Duration) *chip8 {
+func newChip8(cfg *config) *chip8 {
 	ch8 := chip8{
 		addressI:         0,
 		programCounter:   0x200,
-		screen:           newDisplay(windowW, windowH),
-		opcodesPerSecond: opcodesPerSec,
+		screen:           newDisplay(cfg.WindowW, cfg.WindowH),
+		opcodesPerSecond: cfg.OpcodesPerSecond,
 	}
 
 	for i, f := range fontSet {
