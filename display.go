@@ -8,18 +8,14 @@ import (
 )
 
 type display struct {
-	windowW  int32
-	windowH  int32
+	width    int32
+	height   int32
 	pixels   [32][64]byte
-	scale    int32
 	renderer *sdl.Renderer
 }
 
-func newDisplay(width, height int32) *display {
-	d := display{windowW: width, windowH: height}
-	d.scale = int32(len(d.pixels)) / width
-
-	return &d
+func newDisplay(w, h int32) *display {
+	return &display{width: w, height: h}
 }
 
 func (d *display) start() {
@@ -30,8 +26,8 @@ func (d *display) start() {
 
 	wind, err := sdl.CreateWindow(
 		"Chip8 Emulator", sdl.WINDOWPOS_UNDEFINED,
-		sdl.WINDOWPOS_UNDEFINED, d.windowW,
-		d.windowH, sdl.WINDOW_SHOWN,
+		sdl.WINDOWPOS_UNDEFINED, d.width,
+		d.height, sdl.WINDOW_SHOWN,
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -60,12 +56,14 @@ func (d *display) render() {
 	d.renderer.SetDrawColor(0, 0, 0, 128)
 	d.renderer.FillRect(nil)
 
+	scale := int32(len(d.pixels)) / d.width
+
 	for y := range d.pixels {
 		for x := range d.pixels[y] {
 			if d.pixels[y][x] > 0 {
-				xCoord := int32(x) * d.scale
-				yCoord := int32(y) * d.scale
-				rect := sdl.Rect{xCoord, yCoord, d.scale, d.scale}
+				xCoord := int32(x) * scale
+				yCoord := int32(y) * scale
+				rect := sdl.Rect{xCoord, yCoord, scale, scale}
 				d.renderer.SetDrawColor(255, 255, 255, 255)
 				d.renderer.FillRect(&rect)
 			}
