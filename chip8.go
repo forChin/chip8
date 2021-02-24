@@ -49,13 +49,18 @@ type chip8 struct {
 	soundTimer       byte
 	opcodesPerSecond time.Duration
 
+	screen *display
+
 	running bool
 }
 
-func newChip8(windowW, windowH int) *chip8 {
-	ch8 := chip8{}
-	ch8.addressI = 0
-	ch8.programCounter = 0x200
+func newChip8(windowW, windowH int32, opcodesPerSec time.Duration) *chip8 {
+	ch8 := chip8{
+		addressI:         0,
+		programCounter:   0x200,
+		screen:           newDisplay(windowW, windowH),
+		opcodesPerSecond: opcodesPerSec,
+	}
 
 	for i, f := range fontSet {
 		ch8.gameMemory[i] = f
@@ -82,13 +87,13 @@ func (c *chip8) loadROM(romPath string) error {
 func (c *chip8) run() {
 	go c.startTimers()
 	go c.handleKeys()
-	go c.startRender()
+	go c.screen.start()
 
 	ticker := time.NewTicker(c.opcodesPerSecond * time.Millisecond)
 	for range ticker.C {
-		next := getNextOpcode()
+		next := c.getNextOpcode()
 		fmt.Printf("0x%x\n", next)
-		executeOpcode(next)
+		c.executeOpcode(next)
 	}
 }
 
