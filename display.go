@@ -63,7 +63,11 @@ func (d *display) render() {
 			if d.pixels[y][x] > 0 {
 				xCoord := int32(x) * scale
 				yCoord := int32(y) * scale
-				rect := sdl.Rect{xCoord, yCoord, scale, scale}
+				rect := sdl.Rect{
+					X: xCoord, Y: yCoord,
+					W: scale, H: scale,
+				}
+
 				d.renderer.SetDrawColor(255, 255, 255, 255)
 				d.renderer.FillRect(&rect)
 			}
