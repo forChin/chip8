@@ -25,7 +25,7 @@ func (d *display) start() {
 	defer sdl.Quit()
 
 	wind, err := sdl.CreateWindow(
-		"Chip8 Emulator", sdl.WINDOWPOS_UNDEFINED,
+		"Chip8", sdl.WINDOWPOS_UNDEFINED,
 		sdl.WINDOWPOS_UNDEFINED, d.width,
 		d.height, sdl.WINDOW_SHOWN,
 	)
