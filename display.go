@@ -44,7 +44,7 @@ func (d *display) start() {
 	d.renderer.SetDrawBlendMode(sdl.BLENDMODE_BLEND)
 
 	const fps = 60
-	frameLen := time.Duration(1000/fps) * time.Millisecond
+	frameLen := time.Second / time.Duration(fps)
 
 	ticker := time.NewTicker(frameLen)
 	for range ticker.C {
@@ -56,8 +56,9 @@ func (d *display) render() {
 	d.renderer.SetDrawColor(0, 0, 0, 128)
 	d.renderer.FillRect(nil)
 
-	scale := int32(len(d.pixels)) / d.width
+	d.renderer.SetDrawColor(255, 255, 255, 255)
 
+	scale := d.height / int32(len(d.pixels))
 	for y := range d.pixels {
 		for x := range d.pixels[y] {
 			if d.pixels[y][x] > 0 {
@@ -68,7 +69,6 @@ func (d *display) render() {
 					W: scale, H: scale,
 				}
 
-				d.renderer.SetDrawColor(255, 255, 255, 255)
 				d.renderer.FillRect(&rect)
 			}
 		}
