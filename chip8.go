@@ -40,9 +40,9 @@ var (
 type chip8 struct {
 	gameMemory     [0xfff]byte
 	registers      [16]byte
-	addressI       word
+	addressI       uint16
 	gameStack      stack
-	programCounter word
+	programCounter uint16
 	keyState       [16]bool
 
 	delayTimer       byte
