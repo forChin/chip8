@@ -56,7 +56,7 @@ func (d *display) render() {
 	d.renderer.SetDrawColor(0, 0, 0, 128)
 	d.renderer.FillRect(nil)
 
-	d.renderer.SetDrawColor(255, 255, 255, 255)
+	d.renderer.SetDrawColor(30, 255, 30, 255)
 
 	scale := d.height / int32(len(d.pixels))
 	for y := range d.pixels {
