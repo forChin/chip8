@@ -47,7 +47,7 @@ type chip8 struct {
 
 	delayTimer       byte
 	soundTimer       byte
-	opcodesPerSecond time.Duration
+	opcodesPerSecond int
 
 	screen *display
 
@@ -60,6 +60,7 @@ func newChip8(cfg *config) *chip8 {
 		programCounter:   0x200,
 		screen:           newDisplay(cfg.WindowW, cfg.WindowH),
 		opcodesPerSecond: cfg.OpcodesPerSecond,
+		running:          true,
 	}
 
 	for i, f := range fontSet {
@@ -89,8 +90,12 @@ func (c *chip8) run() {
 	go c.handleKeys()
 	go c.screen.start()
 
-	ticker := time.NewTicker(c.opcodesPerSecond * time.Millisecond)
+	ticker := time.NewTicker(time.Second / time.Duration(c.opcodesPerSecond))
 	for range ticker.C {
+		if !c.running {
+			break
+		}
+
 		next := c.getNextOpcode()
 		fmt.Printf("0x%x\n", next)
 		c.executeOpcode(next)
