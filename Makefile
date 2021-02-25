@@ -1,5 +1,5 @@
 EXE=app
 
-start:
+run:
 	go build -o $(EXE)
 	./$(EXE)
