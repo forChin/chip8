@@ -27,7 +27,7 @@ On __macOS__:\
 
     OPCODES_PER_SECOND=300
   ```
-  To run the programm use Makefile:\
+  To run the program use Makefile:\
   `make run`
 
 ### Controls
