@@ -135,7 +135,7 @@ func (c *chip8) opcode00E0(opcode uint16) { // clear display
 }
 
 func (c *chip8) opcode00EE() {
-	c.programCounter = c.gameStack.pop()
+	c.programCounter = c.memStack.pop()
 }
 
 func (c *chip8) opcode1NNN(opcode uint16) {
@@ -144,7 +144,7 @@ func (c *chip8) opcode1NNN(opcode uint16) {
 }
 
 func (c *chip8) opcode2NNN(opcode uint16) {
-	c.gameStack.push(c.programCounter)
+	c.memStack.push(c.programCounter)
 	c.programCounter = opcode & 0x0fff
 	// programCounter = (opcode & 0x0fff) -2
 }

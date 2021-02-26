@@ -42,7 +42,7 @@ type chip8 struct {
 	gameMemory     [0xfff]byte
 	registers      [16]byte
 	addressI       uint16
-	gameStack      stack
+	memStack       stack
 	programCounter uint16
 	keyState       [16]bool
 
