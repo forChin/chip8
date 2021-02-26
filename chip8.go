@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"time"
 
 	"github.com/veandco/go-sdl2/sdl"
@@ -128,7 +129,7 @@ func (c *chip8) handleKeys() {
 			switch t := event.(type) {
 			case *sdl.QuitEvent:
 				c.running = false
-				return
+				os.Exit(0)
 			case *sdl.KeyboardEvent:
 				c.updateKey(t.Keysym.Sym, t.State == sdl.PRESSED)
 			}
