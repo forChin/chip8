@@ -1,6 +1,5 @@
 # CHIP-8 Interpreter
-[CHIP-8](https://en.wikipedia.org/wiki/CHIP-8) is an interpreted minimalist programming language developed in the 70’s for microcomputers [COSMAC VIP](https://en.wikipedia.org/wiki/COSMAC_VIP) и [Telmac 1800](https://en.wikipedia.org/wiki/Telmac_1800). 
-It enjoyed relative success during the late 1970s and early 1980s as a popular language for the development of simple video games. Games written in the CHIP-8 language could easily run on systems that had a CHIP-8 interpreter, often mislabeled as "emulator".
+[CHIP-8](https://en.wikipedia.org/wiki/CHIP-8) is an interpreted minimalist programming language developed in the 70’s. It enjoyed relative success during the late 1970s and early 1980s as a popular language for the development of simple video games.
 
 ![Chip8-games](https://user-images.githubusercontent.com/49096838/109256823-08185b80-7821-11eb-8ae4-041a472f3090.png)
 
