@@ -1,5 +1,5 @@
 # CHIP-8 Interpreter
-[CHIP-8](https://en.wikipedia.org/wiki/CHIP-8) is an interpreted minimalist programming language that enjoyed relative success during the late 1970s and early 1980s as a popular language for the development of simple video games.
+[CHIP-8](https://en.wikipedia.org/wiki/CHIP-8) is an interpreted minimalist programming language that enjoyed relative success during the late 1970s and early 1980s as a popular language for the development of simple video games. You can run these video games written in Chip8 using my interpreter.
 
 ![Chip8-games](https://user-images.githubusercontent.com/49096838/109256823-08185b80-7821-11eb-8ae4-041a472f3090.png)
 
@@ -34,6 +34,7 @@ Original CHIP-8 keyboard layout is mapped to PC keyboard as follows:
 |7|8|9|E| => |A|S|D|F|
 |A|0|B|F| => |Z|X|C|V|
 ```
-## Graphics
-The graphics of games are flicker because it's the way CHIP-8 designed, but my project includes the ability to reduce flickering by simulating the behaviour of old phosphor displays. 
+## A few notes
+- You can find video games to run in [roms folder](https://github.com/forChin/chip8/tree/master/roms).
+- The graphics of games are flicker because it's the way CHIP-8 designed, but my project includes the ability to reduce flickering by simulating the behaviour of old phosphor displays. 
 The pixels of phosphor displays glow for several milliseconds after being turned off which increases the appearance of ghosting.
