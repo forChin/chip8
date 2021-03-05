@@ -78,7 +78,7 @@ func (c *chip8) loadROM(romPath string) error {
 	}
 
 	if len(gameData) > 0xfff-0x200 {
-		return errors.New("Invalid size of ROM") // change err msg
+		return errors.New("Invalid size of ROM")
 	}
 
 	copy(c.gameMemory[0x200:], gameData)

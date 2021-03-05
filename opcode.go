@@ -464,7 +464,6 @@ func (c *chip8) opcodeFX33(opcode uint16) {
 	regx >>= 8
 
 	hundreds := c.registers[regx] / 100
-	// tens := registers[regx] % 100 / 10
 	tens := (c.registers[regx] / 10) % 10
 	ones := c.registers[regx] % 10
 
